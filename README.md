@@ -21,7 +21,7 @@ Structure: [version] [????] [data start byte] [????] [ROI information] [image wi
 + Data: Unsigned 16-bit integer
 
 ### Version 257 (OptoAnalyse 3.0 and higher)
-Note: ROI and scaling information is in the .imi metadata file.
+Note: ROI and scaling information is in the .imi metadata file.  
 Structure: [version] [image width] [image height] [data]
 + Version: Unsigned 16-bit integer
 + Width, Height: Unsigned 16-bit integer
