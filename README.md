@@ -14,7 +14,7 @@ Only interested in the [data] byte stream, other irrelevant bytes will not be sa
 ### Version 256 (up to OptoAnalyse 1.4)
 Structure: [version] [????] [data start byte] [????] [Comment length] [Comment] [ROI information] [image width] [image height] [data]
 + Version: Unsigned 16-bit integer
-+ [????]: Unknown data
++ [????]: Unknown data, possibly headers
 + [data start byte]: Located at 4th byte (0-index), describes ith byte from start of file's byte stream where [data] starts from, offsetted by the preceding 4 bytes. This can vary depending on the data fields present, Unsigned 16-bit integer
 + [Comment length]: Located at 32nd byte (0-index), Unsigned 8-bit integer
 + [Comment]: 4-bit char per character
