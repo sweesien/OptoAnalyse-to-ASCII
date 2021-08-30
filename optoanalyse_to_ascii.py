@@ -163,4 +163,5 @@ def optoanalyse_to_ascii(filename, savetofile = False, fileext = 'csv'):
     
     return ascii_df
 
-test = optoanalyse_to_ascii(filename,True)
+if __name__ == '__main__':
+    test = optoanalyse_to_ascii(filename,True)
