@@ -5,12 +5,12 @@ Created on Fri Aug 27 08:26:35 2021
 @author: sweesien
 
 """
-
+import sys
 import pandas as pd
 import numpy as np
 from pathlib import Path
 
-def optoanalyse_to_ascii(filename, savetofile = False, fileext = 'csv'):
+def optoanalyse_to_ascii(filepath, savetofile = False, fileext = 'csv'):
     """
     This function takes in the full file path (directory/filename.ext) of the 
     OptoAnalyse binary file and extracts intensity data. Returns as a 
@@ -90,15 +90,15 @@ def optoanalyse_to_ascii(filename, savetofile = False, fileext = 'csv'):
     [1024 rows x 1376 columns]
 
     """
-    if type(filename) != 'pathlib.WindowsPath':
-        filename = Path(rf'{filename}')
+    if type(filepath) != 'pathlib.WindowsPath':
+        filepath = Path(rf'{filepath}')
     
     try:
-        f = open(fr'{filename}','rb')
+        f = open(fr'{filepath}','rb')
         content = f.read()
         f.close()
     except:
-        raise FileNotFoundError(f'No such file or directory: "{filename}" ')
+        raise FileNotFoundError(f'No such file or directory: "{filepath}" ')
     
     # read version of OptoAnalyse binary file
     version = int.from_bytes(content[0:2], byteorder='little')
@@ -153,15 +153,44 @@ def optoanalyse_to_ascii(filename, savetofile = False, fileext = 'csv'):
             byte_ptr += 4
     
         ascii_data = np.reshape(ascii_data,(img_height,img_width))/1000
+        
+    else:
+        raise TypeError('Version number not found in header. '
+                        'Not a valid OptoAnalyse File: \"' +
+                        f'{filepath}'.rsplit('\\',1)[1] + '\"')
     
-    ascii_df = pd.DataFrame(ascii_data)
+    
+    ascii_df = pd.DataFrame(ascii_data) # Write to DataFrame
     
     if savetofile == True:
         # Reverse find last period, assumes file extension and strip it.
-        ascii_df.to_csv(rf'{filename}'.rsplit('.',1)[0] + rf'.{fileext}',
-                        sep='\t', header=False, index=False)
-    
+        if fileext in ['csv','asc']:
+            ascii_df.to_csv(f'{filepath}'.rsplit('.',1)[0] + rf'.{fileext}',
+                            sep='\t', header=False, index=False)
+        elif fileext == 'pkl':
+            ascii_df.to_pickle(f'{filepath}'.rsplit('.',1)[0] + rf'.{fileext}',
+                               compression='zip')
     return ascii_df
 
+#%% Guard code
 if __name__ == '__main__':
-    test = optoanalyse_to_ascii(filename,True)
+    from tkinter import Tk, filedialog
+    
+    root = Tk()
+    root.attributes('-topmost', True) # Put File Dialog on top
+    root.withdraw() # Suppress Tkinter window
+    
+    # First level protection against other files.
+    filetypes = [('OptoAnalyse Files','.img'),('OptoAnalyse Files','.imd')]
+    filepaths = filedialog.askopenfilenames(title='Open files',
+                                           filetypes=filetypes)
+    
+    root.destroy()
+    
+    if len(filepaths) == 0:
+        sys.exit('No files selected. Terminating script.')
+    
+    for filepath in filepaths:
+        df = optoanalyse_to_ascii(filepath,savetofile=True,fileext='pkl')
+    
+    root.mainloop()
